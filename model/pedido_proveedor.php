@@ -78,7 +78,7 @@ class pedido_proveedor extends fs_model
    
    public function __construct($p = FALSE)
    {
-      parent::__construct('pedidosprov', 'plugins/presupuestos_y_pedidos_proveedores/');
+      parent::__construct('pedidosprov', 'plugins/presupuestos_y_pedidos_compras/');
       if($p)
       {
          $this->idpedido = $this->intval($p['idpedido']);
