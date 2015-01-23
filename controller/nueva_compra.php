@@ -21,6 +21,7 @@
 require_model('almacen.php');
 require_model('asiento_factura.php');
 require_model('forma_pago.php');
+require_model('proveedor.php');
 
 class nueva_compra extends fs_controller
 {
