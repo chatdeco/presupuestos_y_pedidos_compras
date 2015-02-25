@@ -30,8 +30,8 @@ require_model('secuencia.php');
 /**
  * Pedido de proveedor
  */
-class pedido_proveedor extends fs_model
-{
+class pedido_proveedor extends fs_model {
+
    public $idpedido;
    public $idalbaran;
    public $codigo;
@@ -46,7 +46,7 @@ class pedido_proveedor extends fs_model
    public $coddir;
    public $codpostal;
    public $numero;
-   
+
    /**
     * Número opcional a disposición del usuario.
     * @var type 
@@ -71,15 +71,15 @@ class pedido_proveedor extends fs_model
    public $recfinanciero;
    public $totalrecargo;
    public $observaciones;
-
+   public $status;
    public $editable;
    public $servido;
    public $fechasalida;
-   
+
    public function __construct($p = FALSE)
    {
       parent::__construct('pedidosprov', 'plugins/presupuestos_y_pedidos_compras/');
-      if($p)
+      if ($p)
       {
          $this->idpedido = $this->intval($p['idpedido']);
          $this->idalbaran = $this->intval($p['idalbaran']);
@@ -104,8 +104,8 @@ class pedido_proveedor extends fs_model
          $this->apartado = $p['apartado'];
          $this->fecha = Date('d-m-Y', strtotime($p['fecha']));
 
-         $this->hora =  Date('H:i:s', strtotime($p['fecha']));
-         if( !is_null($p['hora']) )
+         $this->hora = Date('H:i:s', strtotime($p['fecha']));
+         if (!is_null($p['hora']))
             $this->hora = $p['hora'];
 
          $this->neto = floatval($p['neto']);
@@ -119,12 +119,13 @@ class pedido_proveedor extends fs_model
          $this->recfinanciero = floatval($p['recfinanciero']);
          $this->totalrecargo = floatval($p['totalrecargo']);
          $this->observaciones = $p['observaciones'];
+         $this->status = $p['status'];
 
          $this->editable = $this->str2bool($p['editable']);
          $this->servido = $this->str2bool($p['servido']);
-         
+
          $this->fechasalida = NULL;
-         if( isset($p['fechasalida']) )
+         if (isset($p['fechasalida']))
             $this->fechasalida = Date('d-m-Y', strtotime($p['fechasalida']));
       }
       else
@@ -163,128 +164,149 @@ class pedido_proveedor extends fs_model
          $this->recfinanciero = 0;
          $this->totalrecargo = 0;
          $this->observaciones = NULL;
-         
+         $this->status = 0;
+
          $this->editable = TRUE;
          $this->servido = FALSE;
          $this->fechasalida = NULL;
       }
    }
-   
+
    protected function install()
    {
       return '';
    }
-   
-   public function show_hora($s=TRUE)
+
+   public function show_hora($s = TRUE)
    {
-      if($s)
+      if ($s)
+      {
          return Date('H:i:s', strtotime($this->hora));
+      }
       else
          return Date('H:i', strtotime($this->hora));
    }
-   
+
    public function observaciones_resume()
    {
-      if($this->observaciones == '')
+      if ($this->observaciones == '')
+      {
          return '-';
-      else if( strlen($this->observaciones) < 60 )
+      }
+      else if (strlen($this->observaciones) < 60)
+      {
          return $this->observaciones;
+      }
       else
-         return substr($this->observaciones, 0, 50).'...';
+         return substr($this->observaciones, 0, 50) . '...';
    }
-   
+
    public function url()
    {
-      if( is_null($this->idpedido) )
+      if (is_null($this->idpedido))
+      {
          return 'index.php?page=compras_pedidos';
+      }
       else
-         return 'index.php?page=compras_pedido&id='.$this->idpedido;
+         return 'index.php?page=compras_pedido&id=' . $this->idpedido;
    }
-   
+
    public function albaran_url()
    {
-      if( is_null($this->idalbaran) )
+      if (is_null($this->idalbaran))
+      {
          return 'index.php?page=compras_albaran';
+      }
       else
-         return 'index.php?page=compras_albaran&id='.$this->idalbaran;
+         return 'index.php?page=compras_albaran&id=' . $this->idalbaran;
    }
-   
+
    public function agente_url()
    {
-      if( is_null($this->codagente) )
+      if (is_null($this->codagente))
+      {
          return "index.php?page=admin_agentes";
+      }
       else
-         return "index.php?page=admin_agente&cod=".$this->codagente;
+         return "index.php?page=admin_agente&cod=" . $this->codagente;
    }
-   
+
    public function proveedor_url()
    {
-      if( is_null($this->codproveedor) )
+      if (is_null($this->codproveedor))
+      {
          return "index.php?page=compras_proveedores";
+      }
       else
-         return "index.php?page=compras_proveedor&cod=".$this->codproveedor;
+         return "index.php?page=compras_proveedor&cod=" . $this->codproveedor;
    }
-   
+
    public function get_lineas()
    {
       $linea = new linea_pedido_proveedor();
       return $linea->all_from_pedido($this->idpedido);
    }
-   
+
    public function get($id)
    {
-      $pedido = $this->db->select("SELECT * FROM ".$this->table_name." WHERE idpedido = ".$this->var2str($id).";");
-      if($pedido)
+      $pedido = $this->db->select("SELECT * FROM " . $this->table_name . " WHERE idpedido = " . $this->var2str($id) . ";");
+      if ($pedido)
+      {
          return new pedido_proveedor($pedido[0]);
+      }
       else
          return FALSE;
    }
-   
+
    public function exists()
    {
-      if( is_null($this->idpedido) )
+      if (is_null($this->idpedido))
+      {
          return FALSE;
+      }
       else
-         return $this->db->select("SELECT * FROM ".$this->table_name." WHERE idpedido = ".$this->var2str($this->idpedido).";");
+         return $this->db->select("SELECT * FROM " . $this->table_name . " WHERE idpedido = " . $this->var2str($this->idpedido) . ";");
    }
-   
+
    public function new_codigo()
    {
       $sec = new secuencia();
       $sec = $sec->get_by_params2($this->codejercicio, $this->codserie, 'npedidoprov');
-      if($sec)
+      if ($sec)
       {
          $this->numero = $sec->valorout;
          $sec->valorout++;
          $sec->save();
       }
-      
-      if(!$sec OR $this->numero <= 1)
+
+      if (!$sec OR $this->numero <= 1)
       {
-         $numero = $this->db->select("SELECT MAX(".$this->db->sql_to_int('numero').") as num
-            FROM ".$this->table_name." WHERE codejercicio = ".$this->var2str($this->codejercicio).
-            " AND codserie = ".$this->var2str($this->codserie).";");
-         if($numero)
+         $numero = $this->db->select("SELECT MAX(" . $this->db->sql_to_int('numero') . ") as num
+            FROM " . $this->table_name . " WHERE codejercicio = " . $this->var2str($this->codejercicio) .
+                 " AND codserie = " . $this->var2str($this->codserie) . ";");
+         if ($numero)
+         {
             $this->numero = 1 + intval($numero[0]['num']);
+         }
          else
             $this->numero = 1;
-         
-         if($sec)
+
+         if ($sec)
          {
             $sec->valorout = 1 + $this->numero;
             $sec->save();
          }
       }
-      
-      $this->codigo = $this->codejercicio.sprintf('%02s', $this->codserie).sprintf('%06s', $this->numero);
+
+      $this->codigo = $this->codejercicio . sprintf('%02s', $this->codserie) . sprintf('%06s', $this->numero);
    }
-   
+
    public function test()
    {
       $this->observaciones = $this->no_html($this->observaciones);
       $this->totaleuros = $this->total * $this->tasaconv;
-      
-      if( $this->floatcmp($this->total, $this->neto+$this->totaliva-$this->totalirpf+$this->totalrecargo, FS_NF0, TRUE) )
+
+      if ($this->floatcmp($this->total, $this->neto + $this->totaliva - $this->totalirpf + $this->totalrecargo, FS_NF0, TRUE))
       {
          return TRUE;
       }
@@ -294,128 +316,128 @@ class pedido_proveedor extends fs_model
          return FALSE;
       }
    }
-   
+
    public function full_test($duplicados = TRUE)
    {
       $status = TRUE;
-      
+
       /// comprobamos las líneas
       $neto = 0;
       $iva = 0;
       $irpf = 0;
       $recargo = 0;
-      foreach($this->get_lineas() as $l)
+      foreach ($this->get_lineas() as $l)
       {
-         if( !$l->test() )
+         if (!$l->test())
             $status = FALSE;
-         
+
          $neto += $l->pvptotal;
          $iva += $l->pvptotal * $l->iva / 100;
          $irpf += $l->pvptotal * $l->irpf / 100;
          $recargo += $l->pvptotal * $l->recargo / 100;
       }
-      
+
       $neto = round($neto, FS_NF0);
       $iva = round($iva, FS_NF0);
       $irpf = round($irpf, FS_NF0);
       $recargo = round($recargo, FS_NF0);
       $total = $neto + $iva - $irpf + $recargo;
-      
-      if( !$this->floatcmp($this->neto, $neto, FS_NF0, TRUE) )
+
+      if (!$this->floatcmp($this->neto, $neto, FS_NF0, TRUE))
       {
-         $this->new_error_msg("Valor neto de ".FS_PEDIDO." incorrecto. Valor correcto: ".$neto);
+         $this->new_error_msg("Valor neto de " . FS_PEDIDO . " incorrecto. Valor correcto: " . $neto);
          $status = FALSE;
       }
-      else if( !$this->floatcmp($this->totaliva, $iva, FS_NF0, TRUE) )
+      else if (!$this->floatcmp($this->totaliva, $iva, FS_NF0, TRUE))
       {
-         $this->new_error_msg("Valor totaliva de ".FS_PEDIDO." incorrecto. Valor correcto: ".$iva);
+         $this->new_error_msg("Valor totaliva de " . FS_PEDIDO . " incorrecto. Valor correcto: " . $iva);
          $status = FALSE;
       }
-      else if( !$this->floatcmp($this->totalirpf, $irpf, FS_NF0, TRUE) )
+      else if (!$this->floatcmp($this->totalirpf, $irpf, FS_NF0, TRUE))
       {
-         $this->new_error_msg("Valor totalirpf de ".FS_PEDIDO." incorrecto. Valor correcto: ".$irpf);
+         $this->new_error_msg("Valor totalirpf de " . FS_PEDIDO . " incorrecto. Valor correcto: " . $irpf);
          $status = FALSE;
       }
-      else if( !$this->floatcmp($this->totalrecargo, $recargo, FS_NF0, TRUE) )
+      else if (!$this->floatcmp($this->totalrecargo, $recargo, FS_NF0, TRUE))
       {
-         $this->new_error_msg("Valor totalrecargo de ".FS_PEDIDO." incorrecto. Valor correcto: ".$recargo);
+         $this->new_error_msg("Valor totalrecargo de " . FS_PEDIDO . " incorrecto. Valor correcto: " . $recargo);
          $status = FALSE;
       }
-      else if( !$this->floatcmp($this->total, $total, FS_NF0, TRUE) )
+      else if (!$this->floatcmp($this->total, $total, FS_NF0, TRUE))
       {
-         $this->new_error_msg("Valor total de ".FS_PEDIDO." incorrecto. Valor correcto: ".$total);
+         $this->new_error_msg("Valor total de " . FS_PEDIDO . " incorrecto. Valor correcto: " . $total);
          $status = FALSE;
       }
-      else if( !$this->floatcmp($this->totaleuros, $this->total * $this->tasaconv, FS_NF0, TRUE) )
+      else if (!$this->floatcmp($this->totaleuros, $this->total * $this->tasaconv, FS_NF0, TRUE))
       {
-         $this->new_error_msg("Valor totaleuros de ".FS_PEDIDO." incorrecto.
-            Valor correcto: ".round($this->total * $this->tasaconv, FS_NF0));
+         $this->new_error_msg("Valor totaleuros de " . FS_PEDIDO . " incorrecto.
+            Valor correcto: " . round($this->total * $this->tasaconv, FS_NF0));
          $status = FALSE;
       }
-      
-      if($this->idalbaran)
+
+      if ($this->idalbaran)
       {
          $alb0 = new albaran_proveedor();
          $albaran = $alb0->get($this->idalbaran);
-         if(!$albaran)
+         if (!$albaran)
          {
             $this->idalbaran = NULL;
             $this->save();
          }
       }
-      
+
       return $status;
    }
-   
+
    public function save()
    {
-      if( $this->test() )
+      if ($this->test())
       {
-         if( $this->exists() )
+         if ($this->exists())
          {
-            $sql = "UPDATE ".$this->table_name." SET apartado = ".$this->var2str($this->apartado).",
-               cifnif = ".$this->var2str($this->cifnif).", ciudad = ".$this->var2str($this->ciudad).",
-               codagente = ".$this->var2str($this->codagente).", codalmacen = ".$this->var2str($this->codalmacen).",
-               codproveedor = ".$this->var2str($this->codproveedor).", coddir = ".$this->var2str($this->coddir).",
-               coddivisa = ".$this->var2str($this->coddivisa).", codejercicio = ".$this->var2str($this->codejercicio).",
-               codigo = ".$this->var2str($this->codigo).", codpago = ".$this->var2str($this->codpago).",
-               codpais = ".$this->var2str($this->codpais).", codpostal = ".$this->var2str($this->codpostal).",
-               codserie = ".$this->var2str($this->codserie).", direccion = ".$this->var2str($this->direccion).",
-               editable = ".$this->var2str($this->editable).", fecha = ".$this->var2str($this->fecha).", hora = ".$this->var2str($this->hora).",
-               fechasalida = ".$this->var2str($this->fechasalida).", idalbaran = ".$this->var2str($this->idalbaran).",
-               irpf = ".$this->var2str($this->irpf).", neto = ".$this->var2str($this->neto).",
-               nombre = ".$this->var2str($this->nombre).", numero = ".$this->var2str($this->numero).",
-               numero2 = ".$this->var2str($this->numero2).",
-               observaciones = ".$this->var2str($this->observaciones).", porcomision = ".$this->var2str($this->porcomision).",
-               provincia = ".$this->var2str($this->provincia).", recfinanciero = ".$this->var2str($this->recfinanciero).",
-               servido = ".$this->var2str($this->servido).", tasaconv = ".$this->var2str($this->tasaconv).",
-               total = ".$this->var2str($this->total).", totaleuros = ".$this->var2str($this->totaleuros).",
-               totalirpf = ".$this->var2str($this->totalirpf).", totaliva = ".$this->var2str($this->totaliva).",
-               totalrecargo = ".$this->var2str($this->totalrecargo)." WHERE idpedido = ".$this->var2str($this->idpedido).";";
+            $sql = "UPDATE " . $this->table_name . " SET apartado = " . $this->var2str($this->apartado) . ",
+               cifnif = " . $this->var2str($this->cifnif) . ", ciudad = " . $this->var2str($this->ciudad) . ",
+               codagente = " . $this->var2str($this->codagente) . ", codalmacen = " . $this->var2str($this->codalmacen) . ",
+               codproveedor = " . $this->var2str($this->codproveedor) . ", coddir = " . $this->var2str($this->coddir) . ",
+               coddivisa = " . $this->var2str($this->coddivisa) . ", codejercicio = " . $this->var2str($this->codejercicio) . ",
+               codigo = " . $this->var2str($this->codigo) . ", codpago = " . $this->var2str($this->codpago) . ",
+               codpais = " . $this->var2str($this->codpais) . ", codpostal = " . $this->var2str($this->codpostal) . ",
+               codserie = " . $this->var2str($this->codserie) . ", direccion = " . $this->var2str($this->direccion) . ",
+               editable = " . $this->var2str($this->editable) . ", fecha = " . $this->var2str($this->fecha) . ", hora = " . $this->var2str($this->hora) . ",
+               fechasalida = " . $this->var2str($this->fechasalida) . ", idalbaran = " . $this->var2str($this->idalbaran) . ",
+               irpf = " . $this->var2str($this->irpf) . ", neto = " . $this->var2str($this->neto) . ",
+               nombrecliente = " . $this->var2str($this->nombrecliente) . ", numero = " . $this->var2str($this->numero) . ",
+               numero2 = " . $this->var2str($this->numero2) . ", observaciones = " . $this->var2str($this->observaciones) . ", 
+               status = " . $this->var2str($this->status) . ", porcomision = " . $this->var2str($this->porcomision) . ",
+               provincia = " . $this->var2str($this->provincia) . ", recfinanciero = " . $this->var2str($this->recfinanciero) . ",
+               servido = " . $this->var2str($this->servido) . ", tasaconv = " . $this->var2str($this->tasaconv) . ",
+               total = " . $this->var2str($this->total) . ", totaleuros = " . $this->var2str($this->totaleuros) . ",
+               totalirpf = " . $this->var2str($this->totalirpf) . ", totaliva = " . $this->var2str($this->totaliva) . ",
+               totalrecargo = " . $this->var2str($this->totalrecargo) . " WHERE idpedido = " . $this->var2str($this->idpedido) . ";";
             return $this->db->exec($sql);
          }
          else
          {
             $this->new_codigo();
-            $sql = "INSERT INTO ".$this->table_name." (apartado,cifnif,ciudad,codagente,codalmacen,
+            $sql = "INSERT INTO " . $this->table_name . " (apartado,cifnif,ciudad,codagente,codalmacen,
                codproveedor,coddir,coddivisa,codejercicio,codigo,codpais,codpago,codpostal,codserie,
                direccion,editable,fecha,hora,fechasalida,idalbaran,irpf,neto,nombre,
-               numero,observaciones,porcomision,provincia,recfinanciero,servido,tasaconv,total,totaleuros,
-               totalirpf,totaliva,totalrecargo,numero2) VALUES (".$this->var2str($this->apartado).",".$this->var2str($this->cifnif).",
-               ".$this->var2str($this->ciudad).",".$this->var2str($this->codagente).",".$this->var2str($this->codalmacen).",
-               ".$this->var2str($this->codproveedor).",".$this->var2str($this->coddir).",".$this->var2str($this->coddivisa).",
-               ".$this->var2str($this->codejercicio).",".$this->var2str($this->codigo).",".$this->var2str($this->codpais).",
-               ".$this->var2str($this->codpago).",".$this->var2str($this->codpostal).",".$this->var2str($this->codserie).",
-               ".$this->var2str($this->direccion).",".$this->var2str($this->editable).",".$this->var2str($this->fecha).",
-               ".$this->var2str($this->hora).",".$this->var2str($this->fechasalida).",".$this->var2str($this->idalbaran).",
-               ".$this->var2str($this->irpf).",".$this->var2str($this->neto).",".$this->var2str($this->nombre).",
-               ".$this->var2str($this->numero).",".$this->var2str($this->observaciones).",".$this->var2str($this->porcomision).",
-               ".$this->var2str($this->provincia).",".$this->var2str($this->recfinanciero).",".$this->var2str($this->servido).",
-               ".$this->var2str($this->tasaconv).",".$this->var2str($this->total).",".$this->var2str($this->totaleuros).",
-               ".$this->var2str($this->totalirpf).",".$this->var2str($this->totaliva).",".$this->var2str($this->totalrecargo).",
-               ".$this->var2str($this->numero2).");";
-            
-            if( $this->db->exec($sql) )
+               numero,observaciones,status,porcomision,provincia,recfinanciero,servido,tasaconv,total,totaleuros,
+               totalirpf,totaliva,totalrecargo,numero2) VALUES (" . $this->var2str($this->apartado) . "," . $this->var2str($this->cifnif) . ",
+               " . $this->var2str($this->ciudad) . "," . $this->var2str($this->codagente) . "," . $this->var2str($this->codalmacen) . ",
+               " . $this->var2str($this->codproveedor) . "," . $this->var2str($this->coddir) . "," . $this->var2str($this->coddivisa) . ",
+               " . $this->var2str($this->codejercicio) . "," . $this->var2str($this->codigo) . "," . $this->var2str($this->codpais) . ",
+               " . $this->var2str($this->codpago) . "," . $this->var2str($this->codpostal) . "," . $this->var2str($this->codserie) . ",
+               " . $this->var2str($this->direccion) . "," . $this->var2str($this->editable) . "," . $this->var2str($this->fecha) . ",
+               " . $this->var2str($this->hora) . "," . $this->var2str($this->fechasalida) . "," . $this->var2str($this->idalbaran) . ",
+               " . $this->var2str($this->irpf) . "," . $this->var2str($this->neto) . "," . $this->var2str($this->nombrecliente) . ",
+               " . $this->var2str($this->numero) . "," . $this->var2str($this->observaciones) . "," . $this->var2str($this->status) . "," . $this->var2str($this->porcomision) . ",
+               " . $this->var2str($this->provincia) . "," . $this->var2str($this->recfinanciero) . "," . $this->var2str($this->servido) . ",
+               " . $this->var2str($this->tasaconv) . "," . $this->var2str($this->total) . "," . $this->var2str($this->totaleuros) . ",
+               " . $this->var2str($this->totalirpf) . "," . $this->var2str($this->totaliva) . "," . $this->var2str($this->totalrecargo) . ",
+               " . $this->var2str($this->numero2) . ");";
+
+            if ($this->db->exec($sql))
             {
                $this->idpedido = $this->db->lastval();
                return TRUE;
@@ -427,12 +449,12 @@ class pedido_proveedor extends fs_model
       else
          return FALSE;
    }
-   
+
    public function delete()
    {
-      if( $this->db->exec("DELETE FROM ".$this->table_name." WHERE idpedido = ".$this->var2str($this->idpedido).";") )
+      if ($this->db->exec("DELETE FROM " . $this->table_name . " WHERE idpedido = " . $this->var2str($this->idpedido) . ";"))
       {
-         if($this->idalbaran)
+         if ($this->idalbaran)
          {
             /**
              * Delegamos la eliminación en la clase correspondiente,
@@ -440,137 +462,164 @@ class pedido_proveedor extends fs_model
              */
             $albaran = new albaran_proveedor();
             $alb0 = $albaran->get($this->idalbaran);
-            if($alb0)
+            if ($alb0)
             {
                $alb0->delete();
             }
          }
-         
+
          /// modificamos el presupuesto relacionado
-         $this->db->exec("UPDATE presupuestosprov SET idpedido = NULL, editable = TRUE WHERE idpedido = ".$this->var2str($this->idpedido).";");
-         
+         $this->db->exec("UPDATE presupuestosprov SET idpedido = NULL, editable = TRUE WHERE idpedido = " . $this->var2str($this->idpedido) . ";");
+
          return TRUE;
       }
       else
          return FALSE;
    }
-   
-   public function all($offset=0)
+
+   public function all($offset = 0)
    {
       $pedilist = array();
-      $pedidos = $this->db->select_limit("SELECT * FROM ".$this->table_name." ORDER BY fecha DESC, codigo DESC", FS_ITEM_LIMIT, $offset);
-      if($pedidos)
+      
+      $pedidos = $this->db->select_limit("SELECT * FROM " . $this->table_name . " ORDER BY fecha DESC, codigo DESC", FS_ITEM_LIMIT, $offset);
+      if ($pedidos)
       {
-         foreach($pedidos as $p)
+         foreach ($pedidos as $p)
             $pedilist[] = new pedido_proveedor($p);
       }
+      
       return $pedilist;
    }
-   
-   public function all_ptealbaran($offset=0, $order='DESC')
+
+   public function all_ptealbaran($offset = 0, $order = 'DESC')
    {
       $pedilist = array();
-      $pedidos = $this->db->select_limit("SELECT * FROM ".$this->table_name.
-              " WHERE idalbaran IS NULL ORDER BY fecha ".$order.", codigo ".$order, FS_ITEM_LIMIT, $offset);
-      if($pedidos)
+      
+      $pedidos = $this->db->select_limit("SELECT * FROM " . $this->table_name .
+              " WHERE idalbaran IS NULL AND status=0 ORDER BY fecha " . $order . ", codigo " . $order, FS_ITEM_LIMIT, $offset);
+      if ($pedidos)
       {
-         foreach($pedidos as $p)
+         foreach ($pedidos as $p)
             $pedilist[] = new pedido_proveedor($p);
       }
+      
       return $pedilist;
    }
-   
-   public function all_from_proveedor($codproveedor, $offset=0)
+
+   public function all_rechazados($offset = 0, $order = 'DESC')
+   {
+      $preclist = array();
+      
+      $pedidos = $this->db->select_limit("SELECT * FROM " . $this->table_name .
+              " WHERE status=2 ORDER BY fecha " . $order . ", codigo " . $order, FS_ITEM_LIMIT, $offset);
+      if ($pedidos)
+      {
+         foreach ($pedidos as $p)
+            $preclist[] = new pedido_cliente($p);
+      }
+      
+      return $preclist;
+   }
+
+   public function all_from_proveedor($codproveedor, $offset = 0)
    {
       $pedilist = array();
-      $pedidos = $this->db->select_limit("SELECT * FROM ".$this->table_name.
-              " WHERE codproveedor = ".$this->var2str($codproveedor).
+      
+      $pedidos = $this->db->select_limit("SELECT * FROM " . $this->table_name .
+              " WHERE codproveedor = " . $this->var2str($codproveedor) .
               " ORDER BY fecha DESC, codigo DESC", FS_ITEM_LIMIT, $offset);
-      if($pedidos)
+      if ($pedidos)
       {
-         foreach($pedidos as $p)
+         foreach ($pedidos as $p)
             $pedilist[] = new pedido_proveedor($p);
       }
+      
       return $pedilist;
    }
-   
-   public function all_from_agente($codagente, $offset=0)
+
+   public function all_from_agente($codagente, $offset = 0)
    {
       $pedilist = array();
-      $pedidos = $this->db->select_limit("SELECT * FROM ".$this->table_name.
-              " WHERE codagente = ".$this->var2str($codagente).
-              " ORDER BY fecha DESC, codigo DESC", FS_ITEM_LIMIT, $offset);
-      if($pedidos)
+      
+      $pedidos = $this->db->select_limit("SELECT * FROM " . $this->table_name .
+              " WHERE codagente = " . $this->var2str($codagente) ." ORDER BY fecha DESC, codigo DESC", FS_ITEM_LIMIT, $offset);
+      if ($pedidos)
       {
-         foreach($pedidos as $p)
+         foreach ($pedidos as $p)
             $pedilist[] = new pedido_proveedor($p);
       }
+      
       return $pedilist;
    }
-   
+
    public function all_desde($desde, $hasta)
    {
       $pedlist = array();
-      $pedidos = $this->db->select("SELECT * FROM ".$this->table_name.
-         " WHERE fecha >= ".$this->var2str($desde)." AND fecha <= ".$this->var2str($hasta).
-         " ORDER BY codigo ASC;");
-      if($pedidos)
+      
+      $pedidos = $this->db->select("SELECT * FROM " . $this->table_name .
+              " WHERE fecha >= " . $this->var2str($desde) . " AND fecha <= " . $this->var2str($hasta) ." ORDER BY codigo ASC;");
+      if ($pedidos)
       {
-         foreach($pedidos as $p)
+         foreach ($pedidos as $p)
             $pedlist[] = new pedido_proveedor($p);
       }
+      
       return $pedlist;
    }
 
-   public function search($query, $offset=0)
+   public function search($query, $offset = 0)
    {
       $pedilist = array();
-      $query = strtolower( $this->no_html($query) );
-      
-      $consulta = "SELECT * FROM ".$this->table_name." WHERE ";
-      if( is_numeric($query) )
+      $query = strtolower($this->no_html($query));
+
+      $consulta = "SELECT * FROM " . $this->table_name . " WHERE ";
+      if (is_numeric($query))
       {
-         $consulta .= "codigo LIKE '%".$query."%' OR numero2 LIKE '%".$query."%' OR observaciones LIKE '%".$query."%'
-            OR total BETWEEN '".($query-.01)."' AND '".($query+.01)."'";
+         $consulta .= "codigo LIKE '%" . $query . "%' OR numero2 LIKE '%" . $query . "%' OR observaciones LIKE '%" . $query . "%'
+            OR total BETWEEN '" . ($query - .01) . "' AND '" . ($query + .01) . "'";
       }
-      else if( preg_match('/^([0-9]{1,2})-([0-9]{1,2})-([0-9]{4})$/i', $query) ) /// es una fecha
+      else if (preg_match('/^([0-9]{1,2})-([0-9]{1,2})-([0-9]{4})$/i', $query))
       {
-         $consulta .= "fecha = ".$this->var2str($query)." OR observaciones LIKE '%".$query."%'";
+         /// es una fecha
+         $consulta .= "fecha = " . $this->var2str($query) . " OR observaciones LIKE '%" . $query . "%'";
       }
       else
       {
-         $consulta .= "lower(codigo) LIKE '%".$query."%' OR lower(numero2) LIKE '%".$query."%' "
-                 . "OR lower(observaciones) LIKE '%".str_replace(' ', '%', $query)."%'";
+         $consulta .= "lower(codigo) LIKE '%" . $query . "%' OR lower(numero2) LIKE '%" . $query . "%' "
+                 . "OR lower(observaciones) LIKE '%" . str_replace(' ', '%', $query) . "%'";
       }
       $consulta .= " ORDER BY fecha DESC, codigo DESC";
-      
+
       $pedidos = $this->db->select_limit($consulta, FS_ITEM_LIMIT, $offset);
-      if($pedidos)
+      if ($pedidos)
       {
-         foreach($pedidos as $p)
+         foreach ($pedidos as $p)
             $pedilist[] = new pedido_proveedor($p);
       }
+      
       return $pedilist;
    }
-   
-   public function search_from_proveedor($codproveedor, $desde, $hasta, $serie, $obs='')
+
+   public function search_from_proveedor($codproveedor, $desde, $hasta, $serie, $obs = '')
    {
       $pedilist = array();
-      $sql = "SELECT * FROM ".$this->table_name." WHERE codproveedor = ".$this->var2str($codproveedor).
-         " AND idalbaran AND fecha BETWEEN ".$this->var2str($desde)." AND ".$this->var2str($hasta).
-         " AND codserie = ".$this->var2str($serie);
       
-      if($obs != '')
-         $sql .= " AND lower(observaciones) = ".$this->var2str(strtolower($obs));
-      
+      $sql = "SELECT * FROM " . $this->table_name . " WHERE codproveedor = " . $this->var2str($codproveedor) .
+              " AND idalbaran AND fecha BETWEEN " . $this->var2str($desde) . " AND " . $this->var2str($hasta) .
+              " AND codserie = " . $this->var2str($serie);
+
+      if ($obs != '')
+         $sql .= " AND lower(observaciones) = " . $this->var2str(strtolower($obs));
+
       $sql .= " ORDER BY fecha DESC, codigo DESC;";
-      
+
       $pedidos = $this->db->select($sql);
-      if($pedidos)
+      if ($pedidos)
       {
-         foreach($pedidos as $p)
+         foreach ($pedidos as $p)
             $pedilist[] = new pedido_proveedor($p);
       }
+      
       return $pedilist;
    }
 }

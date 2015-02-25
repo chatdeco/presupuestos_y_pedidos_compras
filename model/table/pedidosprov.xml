@@ -197,6 +197,12 @@
       <tipo>double precision</tipo>
       <nulo>YES</nulo>
    </columna>
+   <columna>
+      <nombre>status</nombre>
+      <tipo>integer</tipo>
+      <nulo>NO</nulo>
+      <defecto>0</defecto>
+   </columna>
    <restriccion>
       <nombre>pedidosprov_pkey</nombre>
       <consulta>PRIMARY KEY (idpedido)</consulta>
@@ -204,14 +210,14 @@
    <restriccion>
       <nombre>ca_pedidosprov_series</nombre>
       <consulta>FOREIGN KEY (codserie)
-      REFERENCES series (codserie)
-      ON DELETE RESTRICT ON UPDATE CASCADE</consulta>
+         REFERENCES series (codserie)
+         ON DELETE RESTRICT ON UPDATE CASCADE</consulta>
    </restriccion>
    <restriccion>
       <nombre>ca_pedidosprov_ejercicios</nombre>
       <consulta>FOREIGN KEY (codejercicio)
-      REFERENCES ejercicios (codejercicio)
-      ON DELETE RESTRICT ON UPDATE CASCADE</consulta>
+         REFERENCES ejercicios (codejercicio)
+         ON DELETE RESTRICT ON UPDATE CASCADE</consulta>
    </restriccion>
    <restriccion>
       <nombre>uniq_codigo_pedidosprov</nombre>
