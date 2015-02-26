@@ -184,7 +184,7 @@ class compras_presupuestos extends fs_controller
    {
       $pre = new presupuesto_proveedor();
       $pre1 = $pre->get($_POST['delete']);
-      if pre1)
+      if (pre1)
       {
          if ($pre1->delete())
          {
