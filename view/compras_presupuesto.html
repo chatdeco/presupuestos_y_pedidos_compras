@@ -124,7 +124,7 @@
                <div class="btn-group">
                {loop="$fsc->extensions"}
                   {if="$value->type=='button'"}
-                  <a href="index.php?page={$value->from}&id={$fsc->albaran->idalbaran}" class="btn btn-sm btn-default">{$value->text}</a>
+                  <a href="index.php?page={$value->from}&id={$fsc->albaran->idalbaran}{$value->params}" class="btn btn-sm btn-default">{$value->text}</a>
                   {/if}
                {/loop}
                </div>
@@ -132,10 +132,12 @@
          </div>
          <div class="col-md-4 col-sm-4 col-xs-4 text-right">
             <div class="btn-group">
+               {if="$fsc->allow_delete"}
                <a id="b_eliminar" class="btn btn-sm btn-danger" href="#">
                   <span class="glyphicon glyphicon-trash"></span>
                   <span class="hidden-xs"> &nbsp; Eliminar</span>
                </a>
+               {/if}
                <button class="btn btn-sm btn-primary" type="submit" onclick="this.disabled = true;this.form.submit();">
                   <span class="glyphicon glyphicon-floppy-disk"></span>
                   <span class="hidden-xs"> &nbsp; Guardar</span>
@@ -246,7 +248,7 @@
                         <th class="text-left" style="min-width: 150px;">Descripción</th>
                         <th class="text-right" style="min-width: 70px; width: 90px;">Cantidad</th>
                         <th style="width: 40px;"></th>
-                        <th class="text-right" style="min-width: 100px; width: 120px;">PVP</th>
+                        <th class="text-right" style="min-width: 100px; width: 120px;">Precio</th>
                         <th class="text-right" style="min-width: 90px; width: 90px;">Dto. %</th>
                         <th class="text-right" style="min-width: 100px; width: 120px;">Neto</th>
                         <th class="text-right" style="min-width: 110px; width: 115px;">IVA</th>
@@ -339,7 +341,7 @@
                      <tr>
                         <th class="text-left">Artículo</th>
                         <th class="text-right">Cantidad</th>
-                        <th class="text-right">PVP</th>
+                        <th class="text-right">Precio</th>
                         <th class="text-right">Dto</th>
                         <th class="text-right">Neto</th>
                         <th class="text-right">IVA</th>
@@ -349,7 +351,7 @@
                      </tr>
                   </thead>
                   {loop="$fsc->presupuesto->get_lineas()"}
-                  <tr class="clickableRow" href="{$value->articulo_url()}">
+                  <tr>
                      <td><a href="{$value->articulo_url()}">{$value->referencia}</a> {$value->descripcion}</td>
                      <td class="text-right">{$value->cantidad}</td>
                      <td class="text-right">{$fsc->show_precio($value->pvpunitario, $fsc->presupuesto->coddivisa)}</td>
@@ -545,7 +547,7 @@
                   <span class="glyphicon glyphicon-trash"></span> &nbsp; Eliminar
                </button>
             </div>
-            {if condition="$fsc->presupuesto->idpedido"}
+            {if="$fsc->presupuesto->idpedido"}
             <div class="alert alert-info">
                Hay un {#FS_PEDIDO#} asociado que será eliminada junto con este {#FS_PRESUPUESTO#}.
             </div>

@@ -1,8 +1,8 @@
 <?php
 /*
  * This file is part of FacturaSctipts
- * Copyright (C) 2014  Carlos Garcia Gomez  neorazorx@gmail.com
- * Copyright (C) 2014  Francesc Pineda Segarra  shawe.ewahs@gmail.com
+ * Copyright (C) 2014-2015  Carlos Garcia Gomez  neorazorx@gmail.com
+ * Copyright (C) 2014-2015  Francesc Pineda Segarra  shawe.ewahs@gmail.com
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -579,7 +579,7 @@ class presupuesto_proveedor extends fs_model
       return $preslist;
    }
 
-   public function search_from_proveedor($codproveedor, $desde, $hasta, $serie, $obs='')
+   public function search_from_proveedor($codproveedor, $desde, $hasta, $serie, $obs = '')
    {
       $pedilist = array();
       
