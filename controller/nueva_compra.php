@@ -181,14 +181,8 @@ class nueva_compra extends fs_controller
       /// desactivamos la plantilla HTML
       $this->template = FALSE;
       
-      $json = array();
-      foreach($this->proveedor->get($_REQUEST['datosproveedor']) as $pro)
-      {
-         $json[] = $pro;
-      }
-      
       header('Content-Type: application/json');
-      echo json_encode($json);
+      echo json_encode( $this->proveedor->get($_REQUEST['datosproveedor']) );
    }
    
    private function new_articulo()
@@ -238,29 +232,6 @@ class nueva_compra extends fs_controller
       {
          $this->results[$i]->query = $this->query;
          $this->results[$i]->dtopor = 0;
-      }
-      
-      /// buscamos el grupo de proveedores y la tarifa
-      if( isset($_REQUEST['codproveedor']) )
-      {
-         $proveedor = $this->proveedor->get($_REQUEST['codproveedor']);
-         if($proveedor->codgrupo)
-         {
-            $grupo0 = new grupo_proveedores();
-            $grupo = $grupo0->get($proveedor->codgrupo);
-            if($grupo)
-            {
-               $tarifa0 = new tarifa();
-               $tarifa = $tarifa0->get($grupo->codtarifa);
-               if($tarifa)
-               {
-                  foreach($this->results as $i => $value)
-                  {
-                     $this->results[$i]->dtopor = 0 - $tarifa->incporcentual;
-                  }
-               }
-            }
-         }
       }
       
       header('Content-Type: application/json');
@@ -433,7 +404,7 @@ class nueva_compra extends fs_controller
                $albaran->totalrecargo = round($albaran->totalrecargo, FS_NF0);
                $albaran->total = $albaran->neto + $albaran->totaliva - $albaran->totalirpf + $albaran->totalrecargo;
                
-               if( abs(floatval($_POST['atotal']) - $albaran->total) >= .02)
+               if( abs(floatval($_POST['atotal']) - $albaran->total) >= .02 )
                {
                   $this->new_error_msg("El total difiere entre la vista y el controlador (".
                           $_POST['atotal']." frente a ".$albaran->total."). Debes informar del error.");
@@ -549,29 +520,7 @@ class nueva_compra extends fs_controller
             $factura->pagada = TRUE;
          }
          
-         foreach($proveedor->get_direcciones() as $d)
-         {
-            if($d->domfacturacion)
-            {
-               $factura->codproveedor = $proveedor->codproveedor;
-               $factura->cifnif = $proveedor->cifnif;
-               $factura->nombre = $proveedor->nombrecomercial;
-               $factura->apartado = $d->apartado;
-               $factura->ciudad = $d->ciudad;
-               $factura->coddir = $d->id;
-               $factura->codpais = $d->codpais;
-               $factura->codpostal = $d->codpostal;
-               $factura->direccion = $d->direccion;
-               $factura->provincia = $d->provincia;
-               break;
-            }
-         }
-         
-         if( is_null($factura->codproveedor) )
-         {
-            $this->new_error_msg("No hay ninguna dirección asociada al proveedor.");
-         }
-         else if( $factura->save() )
+         if( $factura->save() )
          {
             $art0 = new articulo();
             $n = floatval($_POST['numlineas']);
@@ -649,7 +598,7 @@ class nueva_compra extends fs_controller
                $factura->totalrecargo = round($factura->totalrecargo, FS_NF0);
                $factura->total = $factura->neto + $factura->totaliva - $factura->totalirpf + $factura->totalrecargo;
                
-               if( abs(floatval($_POST['atotal']) - $factura->total) >= .02)
+               if( abs(floatval($_POST['atotal']) - $factura->total) >= .02 )
                {
                   $this->new_error_msg("El total difiere entre el controlador y la vista (".
                           $factura->total." frente a ".$_POST['atotal']."). Debes informar del error.");
@@ -662,17 +611,17 @@ class nueva_compra extends fs_controller
                   $this->new_change('Factura Proveedor '.$factura->codigo, $factura->url(), TRUE);
                }
                else
-                  $this->new_error_msg("¡Imposible actualizar la <a href='".$factura->url()."'>Factura</a>!");
+                  $this->new_error_msg("¡Imposible actualizar la <a href='".$factura->url()."'>factura</a>!");
             }
             else if( $factura->delete() )
             {
                $this->new_message("Factura eliminada correctamente.");
             }
             else
-               $this->new_error_msg("¡Imposible eliminar la <a href='".$factura->url()."'>Factura</a>!");
+               $this->new_error_msg("¡Imposible eliminar la <a href='".$factura->url()."'>factura</a>!");
          }
          else
-            $this->new_error_msg("¡Imposible guardar la Factura!");
+            $this->new_error_msg("¡Imposible guardar la factura!");
       }
    }
    
